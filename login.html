@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>🦊 Fox Panel 🦊</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="login-container">
+    <!-- Titel -->
+    <h1 class="login-title">🦊 Fox Panel 🦊</h1>
+
+    <!-- Formular -->
+    <form id="loginForm" class="login-form">
+      <label for="email">E-Mail</label>
+      <input id="email" type="email" name="email" required>
+
+      <label for="password">Passwort</label>
+      <input id="password" type="password" name="password" required>
+
+      <!-- Klein: Passwort vergessen -->
+      <button type="button" id="forgotPasswordBtn" class="forgot-link">Passwort vergessen?</button>
+
+      <!-- Groß: Login -->
+      <button type="submit" class="login-btn">Login</button>
+    </form>
+
+    <!-- Meldungen -->
+    <p id="loginMessage"></p>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDEq-PhrcS4CMNKiDvrCNquPSyo9wIcup0",
+      authDomain: "fox-web-44.firebaseapp.com",
+      projectId: "fox-web-44",
+      storageBucket: "fox-web-44.firebasestorage.app",
+      messagingSenderId: "113992857383",
+      appId: "1:113992857383:web:821b53cb52865b09fbdb02",
+      measurementId: "G-965DD6PJ0W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const loginForm = document.getElementById("loginForm");
+    const loginMessage = document.getElementById("loginMessage");
+    const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
+
+    // Login
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        loginMessage.textContent = "Login erfolgreich! Willkommen " + userCredential.user.email;
+        window.location.href = "index.html";
+      } catch (error) {
+        loginMessage.textContent = "Fehler: " + error.message;
+      }
+    });
+
+    // Passwort vergessen
+    forgotPasswordBtn.addEventListener("click", async () => {
+      const email = document.getElementById("email").value;
+      if (!email) {
+        loginMessage.textContent = "Bitte zuerst deine E-Mail eingeben.";
+        return;
+      }
+      try {
+        await sendPasswordResetEmail(auth, email);
+        loginMessage.textContent = "Passwort-Reset-Mail wurde gesendet an " + email;
+      } catch (error) {
+        loginMessage.textContent = "Fehler: " + error.message;
+      }
+    });
+  </script>
+</body>
+</html>

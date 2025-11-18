@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fox Panel</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Menü Button -->
+  <div class="menu-btn" id="menuBtn">
+    <span></span><span></span><span></span>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <nav class="nav">
+      <a class="nav-item" href="#" data-page="main/about.html">About</a>
+      <a class="nav-item" href="#" data-page="main/status.html">Status</a>
+      <a class="nav-item" href="#" data-page="main/panel.html">Panel</a>
+      <a class="nav-item" href="#" data-page="main/help.html">Help</a>
+      <a class="nav-item" href="#" data-page="main/settings.html">Settings</a>
+      <button id="logoutBtn" class="btn">Logout</button>
+    </nav>
+  </aside>
+
+  <!-- Content Bereich -->
+  <main class="content" id="content">
+    <h1 class="welcome-text">Willkommen zurück</h1>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p id="userEmail">Eingeloggt als: ...</p>
+  </footer>
+
+  <!-- Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDEq-PhrcS4CMNKiDvrCNquPSyo9wIcup0",
+      authDomain: "fox-web-44.firebaseapp.com",
+      projectId: "fox-web-44",
+      storageBucket: "fox-web-44.firebasestorage.app",
+      messagingSenderId: "113992857383",
+      appId: "1:113992857383:web:821b53cb52865b09fbdb02",
+      measurementId: "G-965DD6PJ0W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const content = document.getElementById('content');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userEmail = document.getElementById('userEmail');
+
+    // Sidebar Toggle
+    menuBtn.addEventListener('click', () => {
+      menuBtn.classList.toggle('open');
+      sidebar.classList.toggle('open');
+      content.classList.toggle('shift');
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      window.location.href = "login.html";
+    });
+
+    // Auth-Check
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        userEmail.textContent = "Eingeloggt als: " + user.email;
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+
+    // Seiten dynamisch laden
+    async function loadPage(page) {
+      try {
+        const response = await fetch(page);
+        const html = await response.text();
+        content.innerHTML = html;
+      } catch (err) {
+        content.innerHTML = "<p>Fehler beim Laden von " + page + "</p>";
+      }
+    }
+
+    // Klicks auf Sidebar-Links
+    document.querySelectorAll('.nav-item[data-page]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = link.getAttribute('data-page');
+        loadPage(page);
+      });
+    });
+  </script>
+</body>
+</html>
